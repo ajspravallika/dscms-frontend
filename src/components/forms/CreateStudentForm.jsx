@@ -19,6 +19,7 @@ export default function CreateStudentForm({ onSubmit, isSubmitting, error }) {
     section: '',
     parentContact: '',
     phone: '',
+    initialPassword: '',
   });
 
   const handleChange = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -28,6 +29,9 @@ export default function CreateStudentForm({ onSubmit, isSubmitting, error }) {
     const payload = { ...form };
     if (payload.year) payload.year = Number(payload.year);
     else delete payload.year;
+    // Only send initialPassword if the admin actually typed one — leaving
+    // it blank falls back to the backend's auto-generated random password.
+    if (!payload.initialPassword.trim()) delete payload.initialPassword;
     onSubmit(payload);
   };
 
@@ -71,6 +75,19 @@ export default function CreateStudentForm({ onSubmit, isSubmitting, error }) {
         value={form.parentContact}
         onChange={handleChange('parentContact')}
       />
+      <Input
+        label="Initial password (optional)"
+        name="initialPassword"
+        type="text"
+        placeholder="Leave blank to auto-generate a random one"
+        value={form.initialPassword}
+        onChange={handleChange('initialPassword')}
+      />
+      <p className="-mt-2 text-xs text-muted">
+        Useful if you want to set the same password for a whole batch of students instead of
+        sharing a different random password with each one. Must be at least 8 characters with a
+        number. They'll still be asked to set a permanent password on first login.
+      </p>
 
       {error && <ErrorBanner message={error} />}
 
