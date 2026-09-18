@@ -1,122 +1,20 @@
-import { useState } from 'react';
-import DashboardShell from '../../components/layout/DashboardShell';
-import PageHeader from '../../components/layout/PageHeader';
-import Loader from '../../components/common/Loader';
-import ErrorBanner from '../../components/common/ErrorBanner';
-import EmptyState from '../../components/common/EmptyState';
-import StatusBadge from '../../components/common/StatusBadge';
-import Select from '../../components/common/Select';
-import Button from '../../components/common/Button';
-import { useFetch } from '../../hooks/useFetch';
-import { useToast } from '../../components/common/Toast';
-import * as mentorApi from '../../api/mentor.api';
-
-const STATUS_OPTIONS = [
-  { value: 'open', label: 'Open' },
-  { value: 'in-progress', label: 'In progress' },
-  { value: 'resolved', label: 'Resolved' },
-];
-
-function ConcernCard({ concern, onUpdated }) {
-  const { showToast } = useToast();
-  const [response, setResponse] = useState(concern.mentorResponse || '');
-  const [status, setStatus] = useState(concern.status);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSave = async () => {
-    setError('');
-    setIsSaving(true);
-    try {
-      await mentorApi.respondToConcern(concern._id, { mentorResponse: response, status });
-      showToast('Concern updated.');
-      onUpdated();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Could not update the concern.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div className="card p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-ink">{concern.studentId?.name || 'Student'}</p>
-          <p className="text-xs text-muted">
-            {concern.studentId?.rollNumber} · {new Date(concern.createdAt).toLocaleDateString()} ·{' '}
-            <span className="capitalize">{concern.category}</span>
-          </p>
-        </div>
-        <StatusBadge status={concern.status} />
-      </div>
-
-      <p className="mt-3 text-sm text-ink">{concern.description}</p>
-
-      <div className="mt-4 space-y-3 border-t border-line pt-4">
-        <div>
-          <label className="field-label">Your response</label>
-          <textarea
-            className="field-input min-h-[70px]"
-            value={response}
-            onChange={(e) => setResponse(e.target.value)}
-            placeholder="Respond to this concern..."
-          />
-        </div>
-        <div className="flex items-end gap-3">
-          <Select
-            label="Status"
-            options={STATUS_OPTIONS}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-44"
-          />
-          <Button onClick={handleSave} isLoading={isSaving}>
-            Save
-          </Button>
-        </div>
-        {error && <ErrorBanner message={error} />}
-      </div>
-    </div>
-  );
-}
-
+import { useState } from "react";
+import DashboardShell from "../../components/layout/DashboardShell";
+import PageHeader from "../../components/layout/PageHeader";
+import Table from "../../components/common/Table";
+import StatusBadge from "../../components/common/StatusBadge";
+import Modal from "../../components/common/Modal";
+import Button from "../../components/common/Button";
+import Select from "../../components/common/Select";
+import { useFetch } from "../../hooks/useFetch";
+import { useToast } from "../../components/common/Toast";
+import * as mentorApi from "../../api/mentor.api";
+const STATUS_OPTS=[{value:"",label:"All"},{value:"open",label:"Open"},{value:"in-progress",label:"In Progress"},{value:"resolved",label:"Resolved"}];
 export default function MentorConcerns() {
-  const [statusFilter, setStatusFilter] = useState('');
-
-  const { data: concerns, isLoading, error, refetch } = useFetch(
-    () => mentorApi.listConcerns(statusFilter ? { status: statusFilter } : {}),
-    (res) => res.data.data.concerns,
-    [statusFilter]
-  );
-
-  return (
-    <DashboardShell pageTitle="Concerns">
-      <PageHeader
-        title="Student concerns"
-        description="Concerns submitted by your assigned students."
-        action={
-          <Select
-            placeholder="All statuses"
-            options={STATUS_OPTIONS}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-44"
-          />
-        }
-      />
-
-      {isLoading && <Loader />}
-      {error && <ErrorBanner message={error} />}
-      {concerns && concerns.length === 0 && (
-        <EmptyState title="No concerns" description="Concerns submitted by your students will appear here." />
-      )}
-
-      <div className="space-y-4">
-        {concerns?.map((concern) => (
-          <ConcernCard key={concern._id} concern={concern} onUpdated={refetch} />
-        ))}
-      </div>
-    </DashboardShell>
-  );
+  const { showToast }=useToast(); const [statusFilter,setStatusFilter]=useState(""); const [selected,setSelected]=useState(null); const [response,setResponse]=useState(""); const [newStatus,setNewStatus]=useState(""); const [isSubmitting,setIsSubmitting]=useState(false);
+  const { data:concerns,isLoading,error,refetch }=useFetch(()=>mentorApi.listConcerns(statusFilter?{status:statusFilter}:{}),r=>r.data.data.concerns,[statusFilter]);
+  const handleRespond=async()=>{setIsSubmitting(true);try{await mentorApi.respondToConcern(selected._id,{mentorResponse:response,status:newStatus||selected.status});showToast("Updated.");refetch();setSelected(null);}catch(err){showToast(err.response?.data?.message||"Failed.","error");}finally{setIsSubmitting(false);}};
+  const cols=[{key:"student",header:"Student",render:r=>r.studentId?.name||"—"},{key:"title",header:"Title",render:r=>r.title||"Untitled"},{key:"category",header:"Category",render:r=><span className="capitalize">{r.category}</span>},{key:"status",header:"Status",render:r=><StatusBadge status={r.status} />},{key:"date",header:"Date",render:r=>new Date(r.createdAt).toLocaleDateString()},{key:"actions",header:"",render:r=><button onClick={()=>{setSelected(r);setResponse(r.mentorResponse||"");setNewStatus(r.status);}} className="text-xs text-mentor hover:underline">Respond</button>}];
+  return(<DashboardShell pageTitle="Concerns"><PageHeader title="Student Concerns" action={<Select placeholder="All statuses" options={STATUS_OPTS} value={statusFilter} onChange={e=>setStatusFilter(e.target.value)} className="w-40" />} /><div className="card"><Table columns={cols} rows={concerns} isLoading={isLoading} error={error} emptyTitle="No concerns" /></div>
+  <Modal isOpen={!!selected} onClose={()=>setSelected(null)} title="Respond to concern" maxWidth="max-w-md">{selected&&(<div className="space-y-4"><div className="rounded-md bg-paper border border-line p-3"><p className="text-xs text-muted mb-1">{selected.studentId?.name} · <span className="capitalize">{selected.category}</span></p><p className="text-sm font-medium">{selected.title}</p><p className="text-sm text-muted mt-1">{selected.description}</p></div><div><label className="field-label">Your response</label><textarea className="field-input min-h-[80px]" value={response} onChange={e=>setResponse(e.target.value)} /></div><Select label="Update status" options={[{value:"open",label:"Open"},{value:"in-progress",label:"In Progress"},{value:"resolved",label:"Resolved"}]} value={newStatus} onChange={e=>setNewStatus(e.target.value)} /><Button className="w-full" isLoading={isSubmitting} onClick={handleRespond}>Save response</Button></div>)}</Modal></DashboardShell>);
 }

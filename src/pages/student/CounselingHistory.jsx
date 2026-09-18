@@ -1,50 +1,12 @@
-import DashboardShell from '../../components/layout/DashboardShell';
-import PageHeader from '../../components/layout/PageHeader';
-import Loader from '../../components/common/Loader';
-import ErrorBanner from '../../components/common/ErrorBanner';
-import EmptyState from '../../components/common/EmptyState';
-import { useFetch } from '../../hooks/useFetch';
-import * as studentApi from '../../api/student.api';
-
+import DashboardShell from "../../components/layout/DashboardShell";
+import PageHeader from "../../components/layout/PageHeader";
+import Loader from "../../components/common/Loader";
+import ErrorBanner from "../../components/common/ErrorBanner";
+import EmptyState from "../../components/common/EmptyState";
+import StatusBadge from "../../components/common/StatusBadge";
+import { useFetch } from "../../hooks/useFetch";
+import * as studentApi from "../../api/student.api";
 export default function CounselingHistory() {
-  const { data: sessions, isLoading, error } = useFetch(
-    studentApi.getMySessions,
-    (res) => res.data.data.sessions,
-    []
-  );
-
-  return (
-    <DashboardShell pageTitle="Counseling History">
-      <PageHeader
-        title="Your counseling history"
-        description="A record of your past counseling sessions. Some mentor notes are kept private and won't appear here."
-      />
-
-      {isLoading && <Loader />}
-      {error && <ErrorBanner message={error} />}
-      {sessions && sessions.length === 0 && (
-        <EmptyState title="No counseling sessions yet" description="Your session history will appear here after your first meeting." />
-      )}
-
-      <div className="space-y-3">
-        {sessions?.map((session) => (
-          <div key={session._id} className="card p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-ink capitalize">{session.topic}</span>
-              <span className="text-xs text-muted">{new Date(session.sessionDate).toLocaleDateString()}</span>
-            </div>
-            <p className="mt-2 text-sm text-ink">{session.remarks}</p>
-            {session.actionItems && (
-              <p className="mt-2 text-sm text-muted"><span className="font-medium text-ink">Next steps: </span>{session.actionItems}</p>
-            )}
-            {session.nextFollowUpDate && (
-              <p className="mt-1 text-xs text-student">
-                Follow-up: {new Date(session.nextFollowUpDate).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-    </DashboardShell>
-  );
+  const { data:records,isLoading,error }=useFetch(studentApi.getCounselingHistory,r=>r.data.data.records,[]);
+  return(<DashboardShell pageTitle="Counseling History"><PageHeader title="Your Counseling History" description="Only sessions your mentor marked as visible to you are shown." />{isLoading&&<Loader />}{error&&<ErrorBanner message={error} />}{records?.length===0&&<EmptyState title="No counseling records yet" />}<div className="space-y-4">{records?.map((r,i)=>(<div key={i} className="card p-5"><div className="flex items-start justify-between"><div><p className="text-sm font-semibold text-ink">{new Date(r.scheduledDate).toLocaleDateString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p><p className="text-xs text-muted mt-0.5">Mentor: {r.mentorName} · <span className="capitalize">{r.topic}</span></p></div><StatusBadge status={r.record?.attendance||"absent"} /></div>{r.record?.attendance==="present"&&(<div className="mt-3 space-y-2">{r.record.purpose&&<div className="rounded-md bg-paper border border-line p-3"><p className="text-xs text-muted mb-1">Purpose</p><p className="text-sm">{r.record.purpose}</p></div>}{r.record.remarks&&<div className="rounded-md bg-paper border border-line p-3"><p className="text-xs text-muted mb-1">Remarks</p><p className="text-sm">{r.record.remarks}</p></div>}{r.record.outcome&&<div className="rounded-md bg-accent-soft p-3"><p className="text-xs text-muted mb-1">Outcome</p><p className="text-sm">{r.record.outcome}</p></div>}{r.record.actionItems&&<div className="rounded-md bg-mentor-soft p-3"><p className="text-xs text-muted mb-1">Action Items</p><p className="text-sm">{r.record.actionItems}</p></div>}</div>)}</div>))}</div></DashboardShell>);
 }

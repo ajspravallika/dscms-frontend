@@ -1,26 +1,23 @@
-import axiosInstance from './axiosInstance';
-
-// Matches src/routes/admin.routes.js exactly. All routes require
-// protect + allow('admin') on the backend.
-
-// ---- Mentors ----
-export const createMentor = (payload) => axiosInstance.post('/admin/mentors', payload);
-export const listMentors = () => axiosInstance.get('/admin/mentors');
-export const updateMentor = (id, payload) => axiosInstance.patch(`/admin/mentors/${id}`, payload);
-export const deactivateMentor = (id) => axiosInstance.delete(`/admin/mentors/${id}`);
-
-// ---- Students ----
-export const createStudent = (payload) => axiosInstance.post('/admin/students', payload);
-export const listStudents = () => axiosInstance.get('/admin/students');
-export const updateStudent = (id, payload) => axiosInstance.patch(`/admin/students/${id}`, payload);
-export const deactivateStudent = (id) => axiosInstance.delete(`/admin/students/${id}`);
-
-// ---- Assignments ----
-export const assignStudent = (mentorId, studentId) =>
-  axiosInstance.post('/admin/assignments', { mentorId, studentId });
-export const listAssignments = () => axiosInstance.get('/admin/assignments');
-
-// ---- System-wide visibility ----
-// query: { mentorId?, studentId?, topic? }
-export const listAllSessions = (params = {}) => axiosInstance.get('/admin/sessions', { params });
-export const listAllReports = () => axiosInstance.get('/admin/reports');
+import axiosInstance from "./axiosInstance";
+export const listMentors = (params={}) => axiosInstance.get("/admin/mentors", { params });
+export const createMentor = (data) => axiosInstance.post("/admin/mentors", data);
+export const updateMentor = (id, data) => axiosInstance.patch("/admin/mentors/" + id, data);
+export const deactivateMentor = (id) => axiosInstance.post("/admin/mentors/" + id + "/deactivate");
+export const deleteMentor = (id) => axiosInstance.delete("/admin/mentors/" + id);
+export const bulkUploadMentors = (formData) => axiosInstance.post("/admin/mentors/bulk-upload", formData, { headers: { "Content-Type": "multipart/form-data" } });
+export const listStudents = (params={}) => axiosInstance.get("/admin/students", { params });
+export const createStudent = (data) => axiosInstance.post("/admin/students", data);
+export const updateStudent = (id, data) => axiosInstance.patch("/admin/students/" + id, data);
+export const deactivateStudent = (id) => axiosInstance.post("/admin/students/" + id + "/deactivate");
+export const deleteStudent = (id) => axiosInstance.delete("/admin/students/" + id);
+export const bulkUploadStudents = (formData) => axiosInstance.post("/admin/students/bulk-upload", formData, { headers: { "Content-Type": "multipart/form-data" } });
+export const promoteStudents = (passoutBatchLabel) => axiosInstance.post("/admin/students/promote", { passoutBatchLabel });
+export const listPassoutBatches = () => axiosInstance.get("/admin/students/passout-batches");
+export const deletePassoutBatch = (batchLabel) => axiosInstance.delete("/admin/students/passout-batch", { data: { batchLabel } });
+export const listAssignments = (params={}) => axiosInstance.get("/admin/assignments", { params });
+export const assignStudents = (mentorId, studentIds) => axiosInstance.post("/admin/assignments/assign", { mentorId, studentIds });
+export const unassignStudents = (studentIds) => axiosInstance.post("/admin/assignments/unassign", { studentIds });
+export const listDepartments = (params={}) => axiosInstance.get("/admin/departments", { params });
+export const createDepartment = (data) => axiosInstance.post("/admin/departments", data);
+export const updateDepartment = (id, data) => axiosInstance.patch("/admin/departments/" + id, data);
+export const getAllSessions = (params={}) => axiosInstance.get("/admin/sessions", { params });

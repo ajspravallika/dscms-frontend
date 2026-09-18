@@ -1,88 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import DashboardShell from '../../components/layout/DashboardShell';
-import PageHeader from '../../components/layout/PageHeader';
-import Loader from '../../components/common/Loader';
-import ErrorBanner from '../../components/common/ErrorBanner';
-import * as mentorApi from '../../api/mentor.api';
-
-function StatCard({ label, value, to, accentClass = 'text-mentor' }) {
-  const content = (
-    <div className="card p-5">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
-      <p className={`mt-2 font-serif text-3xl font-semibold ${accentClass}`}>{value}</p>
-    </div>
-  );
-  return to ? <Link to={to} className="block transition-opacity hover:opacity-80">{content}</Link> : content;
-}
-
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import DashboardShell from "../../components/layout/DashboardShell";
+import PageHeader from "../../components/layout/PageHeader";
+import Loader from "../../components/common/Loader";
+import ErrorBanner from "../../components/common/ErrorBanner";
+import * as mentorApi from "../../api/mentor.api";
 export default function MentorDashboard() {
-  const [stats, setStats] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function load() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const [studentsRes, sessionsRes, concernsRes] = await Promise.all([
-          mentorApi.listMyStudents(),
-          mentorApi.listSessions(),
-          mentorApi.listConcerns({ status: 'open' }),
-        ]);
-
-        if (!isMounted) return;
-
-        const students = studentsRes.data.data.students;
-        const sessions = sessionsRes.data.data.sessions;
-        const openConcerns = concernsRes.data.data.concerns;
-
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const sessionsThisWeek = sessions.filter((s) => new Date(s.sessionDate) >= sevenDaysAgo);
-
-        setStats({
-          totalStudents: students.length,
-          sessionsThisWeek: sessionsThisWeek.length,
-          openConcerns: openConcerns.length,
-        });
-      } catch (err) {
-        if (isMounted) setError(err.response?.data?.message || 'Could not load dashboard data.');
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return (
-    <DashboardShell pageTitle="Dashboard">
-      <PageHeader
-        title="Your mentoring overview"
-        description="A summary of your assigned students and recent counseling activity."
-      />
-
-      {isLoading && <Loader label="Loading dashboard..." />}
-      {error && <ErrorBanner message={error} />}
-
-      {stats && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard label="Assigned students" value={stats.totalStudents} to="/mentor/students" />
-          <StatCard label="Sessions this week" value={stats.sessionsThisWeek} to="/mentor/sessions" />
-          <StatCard
-            label="Open concerns"
-            value={stats.openConcerns}
-            accentClass={stats.openConcerns > 0 ? 'text-warn' : 'text-mentor'}
-            to="/mentor/concerns"
-          />
-        </div>
-      )}
-    </DashboardShell>
-  );
+  const [data,setData]=useState(null); const [isLoading,setIsLoading]=useState(true); const [error,setError]=useState(null);
+  useEffect(()=>{mentorApi.getDashboard().then(r=>setData(r.data.data)).catch(e=>setError(e.response?.data?.message||"Failed")).finally(()=>setIsLoading(false));},[]);
+  return(<DashboardShell pageTitle="Dashboard"><PageHeader title="Your Overview" />{isLoading&&<Loader />}{error&&<ErrorBanner message={error} />}{data&&(<><div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-6">{[1,2,3,4].map(y=>(<div key={y} className="card p-5"><p className="text-xs text-muted uppercase">Year {y}</p><p className="font-serif text-3xl font-semibold text-mentor mt-2">{data.studentsByYear?.[y]||0}</p></div>))}</div><div className="grid grid-cols-3 gap-4 mb-6"><div className="card p-5"><p className="text-xs text-muted uppercase">Draft Sessions</p><p className="font-serif text-3xl font-semibold text-ink mt-2">{data.draftCount||0}</p></div><div className="card p-5"><p className="text-xs text-muted uppercase">Submitted</p><p className="font-serif text-3xl font-semibold text-accent mt-2">{data.submittedCount||0}</p></div><div className="card p-5"><p className="text-xs text-muted uppercase">Open Concerns</p><p className={"font-serif text-3xl font-semibold mt-2 "+(data.openConcerns>0?"text-warn":"text-ink")}>{data.openConcerns||0}</p></div></div>{data.recentSessions?.length>0&&(<div className="card"><div className="border-b border-line px-5 py-3 flex justify-between items-center"><h3 className="text-sm font-semibold text-ink">Recent Sessions</h3><Link to="/mentor/sessions" className="text-xs text-mentor hover:underline">View all</Link></div><div className="divide-y divide-line">{data.recentSessions.map(s=>(<div key={s._id} className="px-5 py-3"><p className="text-sm font-medium text-ink">{new Date(s.scheduledDate).toLocaleDateString()} — Year {s.year}</p><p className="text-xs text-muted capitalize">{s.topic} · {s.presentCount} present · {s.status}</p></div>))}</div></div>)}</>)}</DashboardShell>);
 }
