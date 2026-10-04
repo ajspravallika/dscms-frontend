@@ -1,19 +1,26 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from "./axiosInstance";
 
-// Matches src/routes/student.routes.js exactly. All routes require
-// protect + allow('student') on the backend.
+// Dashboard
+export const getDashboard = () => axiosInstance.get("/student/dashboard");
 
-export const getMyMentor = () => axiosInstance.get('/student/mentor');
+// Mentor
+export const getMyMentor = () => axiosInstance.get("/student/mentor");
 
-export const getMySessions = () => axiosInstance.get('/student/sessions');
-export const getMyAttendance = () => axiosInstance.get('/student/attendance');
+// Counseling history
+export const getCounselingHistory = () => axiosInstance.get("/student/counseling-history");
+export const getMySessions = () => axiosInstance.get("/student/counseling-history"); // alias
 
-export const submitConcern = (payload) => axiosInstance.post('/student/concerns', payload);
-export const getMyConcerns = () => axiosInstance.get('/student/concerns');
+// Concerns
+export const submitConcern = (data) => axiosInstance.post("/student/concerns", data);
+export const getMyConcerns = () => axiosInstance.get("/student/concerns");
 
-export const getConversationWithMentor = () => axiosInstance.get('/student/messages');
-export const sendMessageToMentor = (content) => axiosInstance.post('/student/messages', { content });
+// Messages
+export const getConversation = () => axiosInstance.get("/student/messages");
+export const getConversationWithMentor = () => axiosInstance.get("/student/messages"); // alias
+export const sendMessage = (content) => axiosInstance.post("/student/messages", { content });
+export const sendMessageToMentor = (content) => axiosInstance.post("/student/messages", { content }); // alias
 
-export const listMyNotifications = () => axiosInstance.get('/student/notifications');
-export const markNotificationRead = (id) =>
-  axiosInstance.patch(`/student/notifications/${id}/read`);
+// Notifications
+export const getNotifications = () => axiosInstance.get("/student/notifications");
+export const listMyNotifications = () => axiosInstance.get("/student/notifications"); // alias
+export const markNotificationRead = (id) => axiosInstance.patch("/student/notifications/" + id + "/read");

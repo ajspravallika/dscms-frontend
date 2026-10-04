@@ -5,6 +5,8 @@ export const updateMentor = (id, data) => axiosInstance.patch("/admin/mentors/" 
 export const deactivateMentor = (id) => axiosInstance.post("/admin/mentors/" + id + "/deactivate");
 export const deleteMentor = (id) => axiosInstance.delete("/admin/mentors/" + id);
 export const bulkUploadMentors = (formData) => axiosInstance.post("/admin/mentors/bulk-upload", formData, { headers: { "Content-Type": "multipart/form-data" } });
+export const getMentorWorkload = (mentorId) => axiosInstance.get("/admin/mentors/" + mentorId + "/workload");
+export const getMentorStudents = (mentorId) => axiosInstance.get("/admin/mentors/" + mentorId + "/students");
 export const listStudents = (params={}) => axiosInstance.get("/admin/students", { params });
 export const createStudent = (data) => axiosInstance.post("/admin/students", data);
 export const updateStudent = (id, data) => axiosInstance.patch("/admin/students/" + id, data);
