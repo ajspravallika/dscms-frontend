@@ -1,4 +1,6 @@
 import axiosInstance from "./axiosInstance";
+export const getSettings = () => axiosInstance.get("/admin/settings");
+export const updateSetting = (key, value) => axiosInstance.patch("/admin/settings/" + key, { value });
 export const listMentors = (params={}) => axiosInstance.get("/admin/mentors", { params });
 export const createMentor = (data) => axiosInstance.post("/admin/mentors", data);
 export const updateMentor = (id, data) => axiosInstance.patch("/admin/mentors/" + id, data);
@@ -19,6 +21,7 @@ export const deletePassoutBatch = (batchLabel) => axiosInstance.delete("/admin/s
 export const listAssignments = (params={}) => axiosInstance.get("/admin/assignments", { params });
 export const assignStudents = (mentorId, studentIds) => axiosInstance.post("/admin/assignments/assign", { mentorId, studentIds });
 export const unassignStudents = (studentIds) => axiosInstance.post("/admin/assignments/unassign", { studentIds });
+export const autoAssignStudents = (mentorIds, studentIds, splitSize) => axiosInstance.post("/admin/assignments/auto-assign", { mentorIds, studentIds, splitSize });
 export const listDepartments = (params={}) => axiosInstance.get("/admin/departments", { params });
 export const createDepartment = (data) => axiosInstance.post("/admin/departments", data);
 export const updateDepartment = (id, data) => axiosInstance.patch("/admin/departments/" + id, data);

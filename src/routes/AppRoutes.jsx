@@ -10,6 +10,7 @@ import ManageMentors from "../pages/admin/ManageMentors";
 import Assignments from "../pages/admin/Assignments";
 import Departments from "../pages/admin/Departments";
 import AllSessions from "../pages/admin/AllSessions";
+import AdminSettings from "../pages/admin/Settings";
 import MentorDashboard from "../pages/mentor/MentorDashboard";
 import MyStudents from "../pages/mentor/MyStudents";
 import RecordSession from "../pages/mentor/RecordSession";
@@ -23,7 +24,13 @@ import CounselingHistory from "../pages/student/CounselingHistory";
 import StudentMessages from "../pages/student/Messages";
 import StudentConcerns from "../pages/student/Concerns";
 import StudentNotifications from "../pages/student/Notifications";
-function RoleHome() { const { user } = useAuth(); if (!user) return <Navigate to="/login" replace />; return <Navigate to={"/" + user.role + "/dashboard"} replace />; }
+
+function RoleHome() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={"/" + user.role + "/dashboard"} replace />;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -37,6 +44,7 @@ export default function AppRoutes() {
           <Route path="/admin/assignments" element={<Assignments />} />
           <Route path="/admin/departments" element={<Departments />} />
           <Route path="/admin/sessions" element={<AllSessions />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
         <Route element={<RoleRoute allowedRoles={["mentor"]} />}>
           <Route path="/mentor/dashboard" element={<MentorDashboard />} />
