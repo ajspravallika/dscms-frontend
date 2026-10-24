@@ -5,6 +5,7 @@ export const getStudentsForSession = (year) => axiosInstance.get("/mentor/studen
 export const createOrUpdateSession = (data) => axiosInstance.post("/mentor/sessions", data);
 export const listSessions = (params={}) => axiosInstance.get("/mentor/sessions", { params });
 export const getSessionById = (id) => axiosInstance.get("/mentor/sessions/" + id);
+export const updateSession = (id, data) => axiosInstance.patch("/mentor/sessions/" + id, data);
 export const submitSession = (id) => axiosInstance.post("/mentor/sessions/" + id + "/submit");
 export const sendMessage = (receiverId, content) => axiosInstance.post("/mentor/messages", { receiverId, content });
 export const sendGroupMessage = (year, content) => axiosInstance.post("/mentor/messages/group", { year, content });
